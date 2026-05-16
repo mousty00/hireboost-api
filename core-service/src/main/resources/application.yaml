@@ -1,3 +1,31 @@
 spring:
   application:
     name: core-service
+
+server:
+  port: 8008
+
+# ORM
+  jpa:
+    hibernate:
+      ddl-auth: validate
+    open-in-view: false
+
+# POSTGRES DB
+  datasource:
+    url:
+    username:
+    password:
+    driver-class-name: org.postgresql.Driver
+
+# FLYWAY
+  flyway:
+    enable: true
+    locations: classpath:db.migration
+    baseline-on-migrate: true # means if your database is empty, Flyway will create its tracking table and mark your current database state as version 1
+    baseline-version: 1    # Starting version number
+
+# SWAGGER
+springdoc:
+  swagger-ui:
+    default-models-expand-depth: -1
