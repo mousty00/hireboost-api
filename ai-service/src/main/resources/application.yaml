@@ -3,7 +3,7 @@ spring:
     name: ai-service
 
 server:
-  port: 8008
+  port: 8083
 
 # ORM
   jpa:
