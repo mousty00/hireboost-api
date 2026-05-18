@@ -2,8 +2,14 @@ CREATE SCHEMA if not exists auth;
 CREATE SCHEMA if not exists core;
 CREATE SCHEMA if not exists ai;
 
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";  -- gen_random_uuid() on PG < 13
+CREATE EXTENSION IF NOT EXISTS "citext";
+
 CREATE TYPE JOBS AS ENUM ('REMOTE', 'HYBRID', 'ONSITE');
 CREATE TYPE APP_STATUS AS ENUM ('BOOKMARKED', 'APPLIED', 'INTERVIEW', 'OFFER', 'WITHDRAWN', 'REJECTED');
+CREATE TYPE CL_TONE AS ENUM ('FORMAL', 'CONVERSATIONAL', 'CREATIVE');
+CREATE TYPE CL_LENGTH AS ENUM('SHORT', 'MEDIUM', 'LONG');
+CREATE TYPE AUTO_APPLY_LOG_STATUS AS ENUM('SUCCESS', 'FAILED', 'SKIPPED');
 
 CREATE TABLE auth.role
 (
@@ -16,7 +22,7 @@ CREATE TABLE if not exists auth.user
     id UUID DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
     email CITEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
-    legalname VARCHAR(250) NOT NULL,
+    legal_name VARCHAR(250) NOT NULL,
     surname VARCHAR(150) NOT NULL,
     preferred_location VARCHAR(120) NULL,
     salary_min INTEGER NULL,
@@ -25,16 +31,16 @@ CREATE TABLE if not exists auth.user
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     role_id INTEGER NOT NULL REFERENCES auth.role(id)
-)
+);
 
 CREATE TABLE if not exists core.job
 (
     id UUID DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
-    extenal_id TEXT UNIQUE NULL,
+    external_id TEXT UNIQUE NULL,
     title VARCHAR(255) NOT NULL,
     company VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
-    skills_required TEXT[] DEFAULT {}
+    skills_required TEXT[] DEFAULT '',
     location_city VARCHAR(100) NULL,
     location_country VARCHAR(150) NULL,
     location_lat DOUBLE PRECISION NULL,
@@ -44,8 +50,8 @@ CREATE TABLE if not exists core.job
     salary_max INTEGER NULL,
     source VARCHAR(100) NULL,
     job_url TEXT NULL,
-    posted_at TIMESTAMP NULL,
-)
+    posted_at TIMESTAMP NULL
+);
 
 CREATE TABLE if not exists core.cv
 (
@@ -53,18 +59,18 @@ CREATE TABLE if not exists core.cv
     user_id UUID NOT NULL REFERENCES auth.user(id),
     title VARCHAR(255) NOT NULL,
     summary TEXT NULL,
-    skills TEXT[] DEFAULT {},
-    languages JSONB DEFAULT []
-    experience JSONB DEFAULT []
-    education JSONB DEFAULT []
-    certication JSONB DEFAULT []
+    skills TEXT[] DEFAULT '',
+    languages JSONB DEFAULT [],
+    experience JSONB DEFAULT [],
+    education JSONB DEFAULT [],
+    certification JSONB DEFAULT [],
     file_url TEXT NULL,
     is_active BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
+);
 
-CREATE TABLE if not exists core.job_applications
+CREATE TABLE if not exists core.job_application
 (
     id UUID DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.user(id),
@@ -83,4 +89,50 @@ CREATE TABLE if not exists core.job_applications
     applied_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
+);
+
+CREATE TABLE if not exists core.auto_apply_log
+(
+    id UUID DEFAULT gen_random_uuid() NOT NULL,
+    user_id UUID NOT NULL REFERENCES auth.user(id),
+    job_id UUID NOT NULL REFERENCES core.job(id),
+    cv_id UUID NOT NULL REFERENCES core.cv(id),
+    match_score FLOAT NOT NULL,
+    status AUTO_APPLY_LOG_STATUS NOT NULL,
+    error_message TEXT,
+    triggered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE if not exists  ai.cover_letter
+(
+    id UUID DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES auth.user(id),
+    cv_id UUID NOT NULL REFERENCES core.cv(id),
+    job_application_id UUID NOT NULL REFERENCES core.job_application(id),
+    jd_text TEXT NOT NULL,
+    tone CL_TONE DEFAULT 'FORMAL',
+    length CL_LENGTH DEFAULT 'MEDIUM',
+    language CHAR(2) DEFAULT 'en',
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE if not exists ai.screen_result
+(
+    id UUID DEFAULT  gen_radom_uuid() NOT NULL,
+    user_id UUID NOT NULL REFERENCES auth.user(id),
+    cv_id UUID NOT NULL REFERENCES core.cv(id),
+    job_id UUID NOT NULL REFERENCES core.job(id),
+    jd_text TEXT NOT NULL,
+    score FLOAT NOT NULL,
+    matched_skills TEXT DEFAULT '{}',
+    missing_skills TEXT DEFAULT '{}',
+    suggestions JSONB DEFAULT [],
+    ats_pass BOOLEAN,
+    raw_response TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX if not exists idx_job_app_user_id ON core.job_application (user_id);
+CREATE INDEX if not exists idx_job_app_job_id ON core.job_application (job_id);
+CREATE INDEX if not exists idx_job_app_status ON core.job_application (application_status);
