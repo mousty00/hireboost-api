@@ -93,7 +93,7 @@ CREATE TABLE if not exists core.job_application
 
 CREATE TABLE if not exists core.auto_apply_log
 (
-    id UUID DEFAULT gen_random_uuid() NOT NULL,
+    id UUID DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.user(id),
     job_id UUID NOT NULL REFERENCES core.job(id),
     cv_id UUID NOT NULL REFERENCES core.cv(id),
@@ -119,7 +119,7 @@ CREATE TABLE if not exists  ai.cover_letter
 
 CREATE TABLE if not exists ai.screen_result
 (
-    id UUID DEFAULT  gen_radom_uuid() NOT NULL,
+    id UUID DEFAULT  gen_radom_uuid() NOT NULL PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.user(id),
     cv_id UUID NOT NULL REFERENCES core.cv(id),
     job_id UUID NOT NULL REFERENCES core.job(id),
