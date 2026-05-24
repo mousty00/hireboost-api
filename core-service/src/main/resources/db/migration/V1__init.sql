@@ -31,7 +31,7 @@ CREATE TABLE if not exists auth.user
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     role_id INTEGER NOT NULL REFERENCES auth.role(id)
-    );
+);
 
 CREATE TABLE if not exists core.job
 (
@@ -51,7 +51,7 @@ CREATE TABLE if not exists core.job
     source VARCHAR(100) NULL,
     job_url TEXT NULL,
     posted_at TIMESTAMP NULL
-    );
+);
 
 CREATE TABLE if not exists core.cv
 (
@@ -68,7 +68,7 @@ CREATE TABLE if not exists core.cv
     is_active BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+);
 
 CREATE TABLE if not exists core.job_application
 (
@@ -89,7 +89,7 @@ CREATE TABLE if not exists core.job_application
     applied_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+);
 
 CREATE TABLE if not exists core.auto_apply_log
 (
@@ -101,7 +101,7 @@ CREATE TABLE if not exists core.auto_apply_log
     status AUTO_APPLY_LOG_STATUS NOT NULL,
     error_message TEXT,
     triggered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+);
 
 CREATE TABLE if not exists  ai.cover_letter
 (
@@ -115,7 +115,7 @@ CREATE TABLE if not exists  ai.cover_letter
     language CHAR(2) DEFAULT 'en',
     content TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+);
 
 CREATE TABLE if not exists ai.screen_result
 (
@@ -131,7 +131,7 @@ CREATE TABLE if not exists ai.screen_result
     ats_pass BOOLEAN,
     raw_response TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
+);
 
 CREATE INDEX if not exists idx_job_app_user_id ON core.job_application (user_id);
 CREATE INDEX if not exists idx_job_app_job_id ON core.job_application (job_id);

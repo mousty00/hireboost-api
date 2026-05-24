@@ -1,27 +1,23 @@
 # syntax=docker/dockerfile:1
 
-# Comments are provided throughout this file to help you get started.
-# If you need more help, visit the Dockerfile reference guide at
-# https://docs.docker.com/go/dockerfile-reference/
-
-# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
-
-################################################################################
-
 # Create a stage for resolving and downloading dependencies.
-FROM eclipse-temurin:21-jdk-jammy as deps
+FROM maven:3.9-eclipse-temurin-21 AS deps
 
 WORKDIR /build
 
-# Copy the mvnw wrapper with executable permissions.
-COPY --chmod=0755 mvnw mvnw
-COPY .mvn/ .mvn/
+# Need BOTH poms — parent for versions, and children for validation
+COPY pom.xml pom.xml
 
-# Download dependencies as a separate step to take advantage of Docker's caching.
-# Leverage a cache mount to /root/.m2 so that subsequent builds don't have to
-# re-download packages.
-RUN --mount=type=bind,source=pom.xml,target=pom.xml \
-    --mount=type=cache,target=/root/.m2 ./mvnw dependency:go-offline -DskipTests
+# Maven reads the parent pom and validates all declared modules exist.
+COPY core-service/pom.xml core-service/pom.xml
+COPY ai-service/pom.xml ai-service/pom.xml
+COPY api-gateway/pom.xml api-gateway/pom.xml
+COPY auth-service/pom.xml auth-service/pom.xml
+
+# -pl core-service → only resolve this module
+# -am → "also make" parents, so Maven walks up and reads the parent pom
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn dependency:go-offline -pl core-service -am
 
 ################################################################################
 
@@ -35,12 +31,12 @@ FROM deps as package
 
 WORKDIR /build
 
-COPY ./src src/
-RUN --mount=type=bind,source=pom.xml,target=pom.xml \
-    --mount=type=cache,target=/root/.m2 \
-    ./mvnw package -DskipTests && \
-    mv target/$(./mvnw help:evaluate -Dexpression=project.artifactId -q -DforceStdout)-$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout).jar target/app.jar
+# Source is now under core-service/src
+COPY core-service/src core-service/src/
 
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn package -pl core-service -am -DskipTests && \
+    mv core-service/target/core-service-*.jar core-service/target/app.jar
 ################################################################################
 
 # Create a stage for extracting the application into separate layers.
@@ -52,7 +48,7 @@ FROM package as extract
 
 WORKDIR /build
 
-RUN java -Djarmode=layertools -jar target/app.jar extract --destination target/extracted
+RUN java -Djarmode=layertools -jar core-service/target/app.jar extract --destination core-service/target/extracted
 
 ################################################################################
 
@@ -81,11 +77,9 @@ RUN adduser \
     appuser
 USER appuser
 
-# Copy the executable from the "package" stage.
-COPY --from=extract build/target/extracted/dependencies/ ./
-COPY --from=extract build/target/extracted/spring-boot-loader/ ./
-COPY --from=extract build/target/extracted/snapshot-dependencies/ ./
-COPY --from=extract build/target/extracted/application/ ./
+COPY --from=extract build/core-service/target/extracted/dependencies/ ./
+COPY --from=extract build/core-service/target/extracted/spring-boot-loader/ ./
+COPY --from=extract build/core-service/target/extracted/snapshot-dependencies/ ./
+COPY --from=extract build/core-service/target/extracted/application/ ./
 
-
-ENTRYPOINT [ "java", "org.springframework.boot.loader.launch.JarLauncher" ]
+ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
