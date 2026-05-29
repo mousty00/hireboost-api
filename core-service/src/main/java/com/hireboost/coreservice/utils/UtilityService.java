@@ -3,6 +3,8 @@ package com.hireboost.coreservice.utils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -16,10 +18,9 @@ public abstract class UtilityService<
     protected final REPOSITORY repository;
     protected final MAPPER mapper;
 
-    public DTO getById(UUID id) {
+    public Optional<DTO> getById(UUID id) {
         return repository.findById(id)
-                .map(mapper::toDTO)
-                .orElseThrow(() -> new EntityNotFoundException("Not found: " + id));
+                .map(mapper::toDTO);
     }
 
     public void delete(UUID id) {

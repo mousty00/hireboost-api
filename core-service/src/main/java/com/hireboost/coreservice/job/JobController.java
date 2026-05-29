@@ -15,7 +15,6 @@ public class JobController {
 
     @GetMapping("/{id}")
     public JobDTO getJobById(@PathVariable UUID id) {
-        return jobService.getById(id);
+        return jobService.getById(id).orElseThrow(JobException::notFound);
     }
-
 }

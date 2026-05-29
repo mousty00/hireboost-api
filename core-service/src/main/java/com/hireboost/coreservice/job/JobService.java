@@ -3,6 +3,9 @@ package com.hireboost.coreservice.job;
 import com.hireboost.coreservice.utils.UtilityService;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
+
 @Service
 public class JobService extends UtilityService<Job, JobDTO, JobMinimalDTO, JobRepository, JobMapper> {
 
