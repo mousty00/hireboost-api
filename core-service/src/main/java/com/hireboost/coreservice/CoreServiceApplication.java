@@ -16,6 +16,6 @@ public class CoreServiceApplication {
 //    TODO remove it
     @GetMapping
     public String getHello() {
-        return "Hello";
+        return "Hello from core";
     }
 }

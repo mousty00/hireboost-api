@@ -2,6 +2,7 @@ name: hireboost
 
 services:
   core-service:
+    container_name: core-service
     build:
       context: ../              # root context so Dockerfile can see parent pom
       dockerfile: core-service/Dockerfile
@@ -14,6 +15,7 @@ services:
         condition: service_healthy
 
   db:
+    container_name: hireboost-database
     image: postgres
     restart: always
     user: postgres
