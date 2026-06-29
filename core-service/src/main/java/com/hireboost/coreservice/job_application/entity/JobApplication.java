@@ -1,7 +1,8 @@
-package com.hireboost.coreservice.job_application;
+package com.hireboost.coreservice.job_application.entity;
 
-import com.hireboost.coreservice.cv.Cv;
-import com.hireboost.coreservice.job.Job;
+import com.hireboost.coreservice.cv.entity.Cv;
+import com.hireboost.coreservice.enums.EAppStatus;
+import com.hireboost.coreservice.job.entity.Job;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -46,8 +47,10 @@ public class JobApplication {
     @Column(name = "\"position\"", nullable = false)
     private String position;
 
-    @Column(name = "application_status", columnDefinition = "app_status not null")
-    private Object applicationStatus;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "application_status", nullable = false)
+    private EAppStatus applicationStatus;
 
     @Size(max = 100)
     @Column(name = "location_city", length = 100)
@@ -82,6 +85,4 @@ public class JobApplication {
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "updated_at")
     private Instant updatedAt;
-
-
 }

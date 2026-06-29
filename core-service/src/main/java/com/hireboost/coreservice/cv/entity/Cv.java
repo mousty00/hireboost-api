@@ -1,4 +1,4 @@
-package com.hireboost.coreservice.cv;
+package com.hireboost.coreservice.cv.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -74,6 +74,4 @@ public class Cv {
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "updated_at")
     private Instant updatedAt;
-
-
 }

@@ -1,4 +1,4 @@
-package com.hireboost.coreservice.job;
+package com.hireboost.coreservice.job.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -76,6 +76,4 @@ public class Job {
     @Column(name = "posted_at")
     @CurrentTimestamp
     private Instant postedAt;
-
-
 }

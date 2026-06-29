@@ -1,13 +1,15 @@
-package com.hireboost.coreservice.job;
+package com.hireboost.coreservice.job.controller;
 
+import com.hireboost.coreservice.exception.JobException;
+import com.hireboost.coreservice.job.dto.JobDTO;
+import com.hireboost.coreservice.job.service.JobService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@Controller("/jobs")
+@RestController
+@RequestMapping("/api/jobs")
 @RequiredArgsConstructor
 public class JobController {
 

@@ -1,8 +1,6 @@
-package com.hireboost.coreservice.job;
+package com.hireboost.coreservice.exception;
 
 import org.springframework.http.HttpStatus;
-
-import java.util.UUID;
 
 public class JobException extends RuntimeException {
     private HttpStatus status;
@@ -15,5 +13,4 @@ public class JobException extends RuntimeException {
     public static JobException notFound() {
         return new JobException("job not found", HttpStatus.NOT_FOUND);
     }
-
 }

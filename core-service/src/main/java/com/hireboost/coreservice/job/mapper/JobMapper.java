@@ -1,5 +1,8 @@
-package com.hireboost.coreservice.job;
+package com.hireboost.coreservice.job.mapper;
 
+import com.hireboost.coreservice.job.dto.JobDTO;
+import com.hireboost.coreservice.job.dto.JobMinimalDTO;
+import com.hireboost.coreservice.job.entity.Job;
 import com.hireboost.coreservice.utils.UtilityMapper;
 import org.mapstruct.Mapper;
 

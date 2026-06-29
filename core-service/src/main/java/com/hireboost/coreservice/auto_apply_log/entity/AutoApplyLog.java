@@ -1,7 +1,8 @@
-package com.hireboost.coreservice.auto_apply_log;
+package com.hireboost.coreservice.auto_apply_log.entity;
 
-import com.hireboost.coreservice.cv.Cv;
-import com.hireboost.coreservice.job.Job;
+import com.hireboost.coreservice.cv.entity.Cv;
+import com.hireboost.coreservice.enums.EAutoApplyLogStatus;
+import com.hireboost.coreservice.job.entity.Job;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -39,8 +40,10 @@ public class AutoApplyLog {
     @Column(name = "match_score", nullable = false)
     private Double matchScore;
 
-    @Column(name = "status", columnDefinition = "auto_apply_log_status not null")
-    private Object status;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private EAutoApplyLogStatus status;
 
     @Column(name = "error_message", length = Integer.MAX_VALUE)
     private String errorMessage;
@@ -48,6 +51,4 @@ public class AutoApplyLog {
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "triggered_at")
     private Instant triggeredAt;
-
-
 }
